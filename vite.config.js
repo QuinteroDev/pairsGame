@@ -1,28 +1,24 @@
 import { defineConfig } from 'vite';
-import { createHtmlPlugin } from 'vite-plugin-html';
+import { resolve } from 'path';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
-  base: './',
   server: {
     open: true
   },
   resolve: {
     alias: {
-      '@': '/src'
+      '@': resolve(__dirname, 'src')
     }
   },
   plugins: [
-    createHtmlPlugin({
-      inject: {
-        data: {
-          title: 'Cuadrícula de Cajas',
-        },
-      },
-    }),
-  ],
-  css: {
-    preprocessorOptions: {
-      scss: {}
-    }
-  }
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'img8',
+          dest: '.'
+        }
+      ]
+    })
+  ]
 });

@@ -13,7 +13,9 @@
   "devDependencies": {
     "gh-pages": "^6.1.1",
     "vite": "^5.2.0",
-    "vite-plugin-html": "^3.2.2"
+    "vite-plugin-copy": "^0.1.6",
+    "vite-plugin-html": "^3.2.2",
+    "vite-plugin-static-copy": "^1.0.5"
   },
   "dependencies": {
     "sass": "^1.77.4"
