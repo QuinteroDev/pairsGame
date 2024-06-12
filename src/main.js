@@ -1,13 +1,9 @@
 import '../saas/main.scss';
-//8 Juguemos a adivinar las parejas. Debes distribuir en la página una cuadrícula de 6 x 5 cajas. De las 30 cajas habrá 15 distintas. 
-//Cada par de cajas será de un color distinto. Inicialmente todas las cajas aparecerán negras. Cuando el usuario pinche sobre una caja, 
-//se revelará su auténtico color. En ese momento debes arrastrar la caja al lugar donde creas que se encuentra su pareja. 
-//Si aciertas, ambas cajas permanecerán boca arriba y ya no se podrá interactuar con ellas. Si fallas, las dos cajas volverán a su estado inicial. 
-//El programa debe detectar cuándo están todas las cajas emparejadas y cuánto tiempo has tardado en resolverlo.
 
-let cajaSeleccionada = null; // Para almacenar la caja actualmente seleccionada
-let segundaCajaSeleccionada = null; // Para almacenar la segunda caja seleccionada
-let bloqueandoCajas = false; // Para evitar múltiples selecciones simultáneas
+// Variables globales
+let cajaSeleccionada = null;
+let segundaCajaSeleccionada = null;
+let bloqueandoCajas = false;
 let cronometroInterval;
 let tiempoInicial;
 
@@ -35,7 +31,7 @@ function initGame() {
 }
 
 function revealImage(event) {
-    if (bloqueandoCajas) return; // Si las cajas están bloqueadas, no hacer nada
+    if (bloqueandoCajas) return;
 
     let box = event.target;
 
@@ -59,7 +55,7 @@ function revealImage(event) {
 
 function mostrarImagen(box) {
     let rutaCompletaImagen = box.getAttribute('data-image-url');
-    box.style.backgroundImage = rutaCompletaImagen;
+    box.style.backgroundImage = `url(${rutaCompletaImagen})`;
     box.style.backgroundSize = 'cover';
     box.style.backgroundPosition = 'center';
     console.log('Imagen revelada:', rutaCompletaImagen);
@@ -137,8 +133,8 @@ function barajarImagenes() {
 
     // Crear un array de URLs de imágenes
     for (let i = 1; i <= 15; i++) {
-        imagenes.push(`url("./img8/img${i}.png")`);
-        imagenes.push(`url("./img8/img${i}.png")`);
+        imagenes.push(`./img8/img${i}.png`);
+        imagenes.push(`./img8/img${i}.png`);
     }
 
     // Barajar el array de imágenes
