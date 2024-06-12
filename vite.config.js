@@ -1,12 +1,28 @@
 import { defineConfig } from 'vite';
+import { createHtmlPlugin } from 'vite-plugin-html';
 
 export default defineConfig({
-    server: {
-        open: true
-    },
-    resolve: {
-        alias: {
-            '@': '/src'
-        }
+  base: './',
+  server: {
+    open: true
+  },
+  resolve: {
+    alias: {
+      '@': '/src'
     }
+  },
+  plugins: [
+    createHtmlPlugin({
+      inject: {
+        data: {
+          title: 'Cuadrícula de Cajas',
+        },
+      },
+    }),
+  ],
+  css: {
+    preprocessorOptions: {
+      scss: {}
+    }
+  }
 });
