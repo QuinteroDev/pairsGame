@@ -1,6 +1,5 @@
 import '../saas/main.scss';
 
-// Variables globales
 let cajaSeleccionada = null;
 let segundaCajaSeleccionada = null;
 let bloqueandoCajas = false;
@@ -15,19 +14,44 @@ function initGame() {
         box.style.pointerEvents = 'auto';
     });
 
-    // Botón de iniciar cronómetro
+    // Cargar estado guardado en LocalStorage al inicio del juego
+    cargarEstadoJuego();
+
+    // Start Timer
     let botonCronometro = document.getElementById("iniciarCronometro");
     botonCronometro.addEventListener('click', iniciarCronometro);
 
-    // Botón de reiniciar juego
+    // Reset Game
     let botonReiniciar = document.getElementById("reiniciarJuego");
     botonReiniciar.addEventListener('click', reiniciarJuego);
 
-    // Resetear cronómetro
-    document.getElementById('cronometro').textContent = '00:00';
-    clearInterval(cronometroInterval);
+    // Cargar estado del cronómetro si existe
+    cargarCronometroDesdeLocalStorage();
 
-    barajarImagenes(); // Barajar imágenes al inicio del juego
+    // Shuffle images
+    barajarImagenes();
+}
+
+function cargarCronometroDesdeLocalStorage() {
+    let cronometroGuardado = localStorage.getItem('cronometro');
+
+    if (cronometroGuardado) {
+        let tiempo = JSON.parse(cronometroGuardado);
+        tiempoInicial = Date.now() - (tiempo.minutos * 60 + tiempo.segundos) * 1000;
+
+        cronometroInterval = setInterval(() => {
+            let tiempoTranscurrido = Math.floor((Date.now() - tiempoInicial) / 1000);
+            let minutos = Math.floor(tiempoTranscurrido / 60);
+            let segundos = tiempoTranscurrido % 60;
+            document.getElementById('cronometro').textContent = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+
+            // Guardar el estado del cronómetro en LocalStorage
+            localStorage.setItem('cronometro', JSON.stringify({
+                minutos: minutos,
+                segundos: segundos
+            }));
+        }, 1000);
+    }
 }
 
 function revealImage(event) {
@@ -35,12 +59,10 @@ function revealImage(event) {
 
     let box = event.target;
 
-    // Si la caja ya está revelada, no hacer nada
     if (box.style.pointerEvents === 'none') {
         return;
     }
 
-    // Si no hay ninguna caja seleccionada, seleccionar esta caja
     if (!cajaSeleccionada) {
         cajaSeleccionada = box;
         mostrarImagen(cajaSeleccionada);
@@ -48,17 +70,15 @@ function revealImage(event) {
         segundaCajaSeleccionada = box;
         mostrarImagen(segundaCajaSeleccionada);
 
-        // Comparar las dos imágenes después de un breve retraso
         setTimeout(compararImagenes, 1000);
     }
 }
 
 function mostrarImagen(box) {
     let rutaCompletaImagen = box.getAttribute('data-image-url');
-    box.style.backgroundImage = `url(${rutaCompletaImagen})`;
+    box.style.backgroundImage = rutaCompletaImagen;
     box.style.backgroundSize = 'cover';
     box.style.backgroundPosition = 'center';
-    console.log('Imagen revelada:', rutaCompletaImagen);
 }
 
 function compararImagenes() {
@@ -68,21 +88,20 @@ function compararImagenes() {
     let imagenActual = segundaCajaSeleccionada.getAttribute('data-image-url');
 
     if (imagenSeleccionada === imagenActual) {
-        // Si las imágenes son iguales, desactivar ambas cajas
         cajaSeleccionada.style.pointerEvents = 'none';
         segundaCajaSeleccionada.style.pointerEvents = 'none';
+
+        // Guardar estado actualizado en LocalStorage
+        guardarEstadoJuego();
     } else {
-        // Si las imágenes son diferentes, ocultar ambas cajas
         cajaSeleccionada.style.backgroundImage = 'none';
         segundaCajaSeleccionada.style.backgroundImage = 'none';
     }
 
-    // Resetear las variables
     cajaSeleccionada = null;
     segundaCajaSeleccionada = null;
     bloqueandoCajas = false;
 
-    // Verificar si el juego ha terminado
     verificarFinJuego();
 }
 
@@ -98,7 +117,7 @@ function verificarFinJuego() {
 
     if (juegoTerminado) {
         clearInterval(cronometroInterval);
-        alert('Congratulations! You have found all pairs!.');
+        alert('¡Felicidades! ¡Has encontrado todas las parejas!');
     }
 }
 
@@ -111,39 +130,86 @@ function iniciarCronometro() {
         let minutos = Math.floor(tiempoTranscurrido / 60);
         let segundos = tiempoTranscurrido % 60;
         document.getElementById('cronometro').textContent = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+
+        // Guardar el estado del cronómetro en LocalStorage
+        localStorage.setItem('cronometro', JSON.stringify({
+            minutos: minutos,
+            segundos: segundos
+        }));
     }, 1000);
 }
 
 function reiniciarJuego() {
-    clearInterval(cronometroInterval); // Detener el cronómetro
-    document.getElementById('cronometro').textContent = '00:00'; // Resetear el display del cronómetro
-    
+    clearInterval(cronometroInterval);
+    document.getElementById('cronometro').textContent = '00:00';
+
     let boxes = document.querySelectorAll('.box');
     boxes.forEach(box => {
-        box.style.backgroundImage = 'none'; // Ocultar la imagen
-        box.style.pointerEvents = 'auto'; // Reestablecer la interactividad de las cajas
+        box.style.backgroundImage = 'none';
+        box.style.pointerEvents = 'auto';
     });
 
-    barajarImagenes(); // Barajar las imágenes para la nueva partida
+    barajarImagenes();
+
+    // Limpiar LocalStorage al reiniciar el juego
+    localStorage.removeItem('juegoEstado');
+    localStorage.removeItem('cronometro');
 }
 
 function barajarImagenes() {
     let boxes = document.querySelectorAll('.box');
     let imagenes = [];
 
-    // Crear un array de URLs de imágenes
     for (let i = 1; i <= 15; i++) {
-        imagenes.push(`./img8/img${i}.png`);
-        imagenes.push(`./img8/img${i}.png`);
+        imagenes.push(`url("./img8/img${i}.png")`);
+        imagenes.push(`url("./img8/img${i}.png")`);
     }
 
-    // Barajar el array de imágenes
     imagenes.sort(() => Math.random() - 0.5);
 
-    // Asignar las imágenes barajadas a las cajas
     boxes.forEach((box, index) => {
-        box.setAttribute('data-image-url', imagenes[index]); // Actualizar con la nueva imagen barajada
+        box.setAttribute('data-image-url', imagenes[index]);
     });
+}
+
+function guardarEstadoJuego() {
+    let estadoJuego = [];
+
+    let boxes = document.querySelectorAll('.box');
+    boxes.forEach(box => {
+        if (box.style.pointerEvents === 'none') {
+            estadoJuego.push({
+                id: box.id,
+                backgroundImage: box.style.backgroundImage
+            });
+        }
+    });
+
+    localStorage.setItem('juegoEstado', JSON.stringify(estadoJuego));
+}
+
+function cargarEstadoJuego() {
+    let estadoGuardado = localStorage.getItem('juegoEstado');
+
+    if (estadoGuardado) {
+        let estadoJuego = JSON.parse(estadoGuardado);
+
+        estadoJuego.forEach(item => {
+            let box = document.getElementById(item.id);
+            box.style.backgroundImage = item.backgroundImage;
+            box.style.backgroundSize = 'cover';
+            box.style.backgroundPosition = 'center';
+            box.style.pointerEvents = 'none';
+        });
+    }
+
+    // Cargar estado del cronómetro si existe
+    let cronometroGuardado = localStorage.getItem('cronometro');
+
+    if (cronometroGuardado) {
+        let tiempo = JSON.parse(cronometroGuardado);
+        document.getElementById('cronometro').textContent = `${tiempo.minutos.toString().padStart(2, '0')}:${tiempo.segundos.toString().padStart(2, '0')}`;
+    }
 }
 
 window.onload = initGame;
